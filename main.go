@@ -80,12 +80,14 @@ func handlePost(c *gin.Context) {
 		var result SearchResult = parseSearch(doc)
 		saveJsonFile(result, "result")
 		c.JSON(http.StatusOK, result)
-		return
+	} else if isReviewPage(doc) {
+		var result ReviewResult = parseReview(doc)
+		saveJsonFile(result, "result")
+		c.JSON(http.StatusOK, result)
 	} else {
 		var result ProductResult = parseProduct(doc)
-		fmt.Println(result.Data.PriceCurrency, result.Data.Price)
+		saveJsonFile(result, "result")
 		c.JSON(http.StatusOK, result)
-		return
 	}
 }
 
