@@ -76,19 +76,16 @@ func handlePost(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	var result interface{}
 	if isSearchPage(doc) {
-		var result SearchResult = parseSearch(doc)
-		saveJsonFile(result, "result")
-		c.JSON(http.StatusOK, result)
+		result = parseSearch(doc)
 	} else if isReviewPage(doc) {
-		var result ReviewResult = parseReview(doc)
-		saveJsonFile(result, "result")
-		c.JSON(http.StatusOK, result)
+		result = parseReview(doc)
 	} else {
-		var result ProductResult = parseProduct(doc)
-		saveJsonFile(result, "result")
-		c.JSON(http.StatusOK, result)
+		result = parseProduct(doc)
 	}
+	// saveJsonFile(result, "result")
+	c.JSON(http.StatusOK, result)
 }
 
 func main() {
