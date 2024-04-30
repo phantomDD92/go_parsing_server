@@ -2,6 +2,7 @@ import requests
 import sys
 import os
 import json
+
 PRODUCT_OVERALL_FILEDS = [
     "aplus_present", 
     "availability_status", 
@@ -40,6 +41,33 @@ PRODUCT_CRITICAL_FILEDS = [
     "sold_by",
 ]
 
+REVIEW_OVERALL_FILEDS = [
+    "average_rating", 
+    "total_reviews", 
+    "5_star_ratings",
+    "5_star_percentage",
+    "4_star_ratings",
+    "4_star_percentage",
+    "3_star_ratings",
+    "3_star_percentage",
+    "2_star_ratings",
+    "2_star_percentage",
+    "1_star_ratings",
+    "1_star_percentage",
+    "product",
+    "top_positive_review",
+    "top_critical_review",
+    "reviews",
+    "pagination",
+]
+
+REVIEW_CRITICAL_FILEDS = [
+    "average_rating", 
+    "total_reviews", 
+    "product",
+    "reviews",
+]
+
 SEARCH_OVERALL_FILEDS = [
     "ads",
     "explore_more_items",
@@ -49,12 +77,12 @@ SEARCH_OVERALL_FILEDS = [
 
 SEARCH_RESULT_OVERALL_FILEDS = [
     "asin",
-		"has_prime",
-		"image",
-		"is_amazon_choice",
-		"is_best_seller",
-		"is_limited_deal",
-		"name",
+	"has_prime",
+	"image",
+	"is_amazon_choice",
+	"is_best_seller",
+	"is_limited_deal",
+	"name",
     "position",
     "price",
     "price_string",
@@ -88,10 +116,22 @@ class ApiTester():
     def isEmpty(self, value):
         return value == None or value == ""
     
-    def isProduct(self, data):
-        return data.get("ads", None) == None
+    def isSearch(self, data):
+        return data.get("ads", None) != None
+
+    def isReview(self, data):
+        return data.get("reviews", None) != None
 
     def scoreForProduct(self, data, fields):
+        count = 0
+        score = 0
+        for key in fields:
+            count += 1
+            if not self.isEmpty(data.get(key, None)):
+                score += 1
+        return score / count
+    
+    def scoreForReview(self, data, fields):
         count = 0
         score = 0
         for key in fields:
@@ -114,11 +154,22 @@ class ApiTester():
 
 
     def overallScore(self, data):
-        return self.scoreForProduct(data, PRODUCT_OVERALL_FILEDS) if self.isProduct(data) else self.scoreForSearch(data, SEARCH_RESULT_OVERALL_FILEDS)
+        if self.isSearch(data):
+            return self.scoreForSearch(data, SEARCH_RESULT_OVERALL_FILEDS)
+        elif self.isReview(data):
+            return self.scoreForReview(data, REVIEW_OVERALL_FILEDS)
+        else:
+            return self.scoreForProduct(data, PRODUCT_OVERALL_FILEDS)
+        
 
     def criticalScore(self, data):
-        return self.scoreForProduct(data, PRODUCT_CRITICAL_FILEDS) if self.isProduct(data) else self.scoreForSearch(data, SEARCH_RESULT_CRITICAL_FILEDS)
-    
+        if self.isSearch(data):
+            return self.scoreForSearch(data, SEARCH_RESULT_CRITICAL_FILEDS)
+        elif self.isReview(data):
+             return self.scoreForReview(data, REVIEW_CRITICAL_FILEDS)
+        else:
+            return self.scoreForProduct(data, PRODUCT_CRITICAL_FILEDS)   
+        
     def hasData(self, result):
         return result.get("data", None) != None
     
