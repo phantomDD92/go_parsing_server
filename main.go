@@ -51,11 +51,14 @@ func parseAndSave(filename string) bool {
 		println(err)
 		return false
 	}
-	if !isSearchPage(doc) {
-		result := parseProduct(doc)
+	if isSearchPage(doc) {
+		result := parseSearch(doc)
+		return saveJsonFile(result, filename)
+	} else if isReviewPage(doc) {
+		result := parseReview(doc)
 		return saveJsonFile(result, filename)
 	} else {
-		result := parseSearch(doc)
+		result := parseProduct(doc)
 		return saveJsonFile(result, filename)
 	}
 }
@@ -87,6 +90,7 @@ func handlePost(c *gin.Context) {
 }
 
 func main() {
+	// parseAndSave("review1")
 	r := gin.Default()
 	r.MaxMultipartMemory = 512 << 20 // 8 MiB
 	// Define a route and its handler
@@ -109,5 +113,4 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil {
 		panic(err)
 	}
-
 }

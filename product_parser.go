@@ -99,7 +99,7 @@ func parseProduct(doc *goquery.Document) ProductResult {
 	brandTag := doc.Find("#bylineInfo").First()
 	if brandTag.Length() > 0 {
 		data.Brand = normalizeText(brandTag.Text())
-		data.BrandURL = normalizeUrl(baseUrl + brandTag.AttrOr("href", ""))
+		data.BrandURL = normalizeUrl(baseUrl, brandTag.AttrOr("href", ""))
 	}
 	// customization_options
 	twisterTag := doc.Find("#twister").First()

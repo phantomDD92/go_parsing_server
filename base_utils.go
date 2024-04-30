@@ -16,6 +16,14 @@ func normalizeText(text string) string {
 	return newStr
 }
 
+func normalizeTextWithReturn(text string) string {
+	text = strings.ReplaceAll(text, "‎", "")
+	re := regexp.MustCompile(`[^\S\r\n]+`)
+	replacedStr := re.ReplaceAllString(strings.TrimSpace(text), " ")
+	newStr := strings.ReplaceAll(replacedStr, "\u0026", "&")
+	return newStr
+}
+
 func normalizeImage(url string) string {
 	if url[:15] != "https://m.media" {
 		return ""
@@ -46,12 +54,30 @@ func getBaseUrl(url string) string {
 	return strings.Join(parts, "/")
 }
 
-func normalizeUrl(url string) string {
-	return strings.ReplaceAll(url, "\u0026", "&")
+func normalizeUrl(baseurl string, path string) string {
+	if path != "" {
+		return strings.ReplaceAll(baseurl+path, "\u0026", "&")
+	}
+	return ""
 }
 
 func extractText(s *goquery.Selection, splitter string) string {
 	var allText string = ""
+	if s.Get(0).Data != "span" && s.Children().Length() > 0 {
+		s.Children().Each(func(index int, item *goquery.Selection) {
+			allText += extractText(item, splitter)
+		})
+	} else {
+		if s.Get(0).Type == html.TextNode || s.Get(0).Data == "p" || s.Get(0).Data == "span" || s.Get(0).Data == "h2" || s.Get(0).Data == "h3" || s.Get(0).Data == "h4" {
+			allText += normalizeText(s.Text()) + splitter
+		}
+	}
+	return strings.TrimSpace(allText)
+}
+
+func extractText1(s *goquery.Selection, splitter string) string {
+	var allText string = ""
+	println(s.Get(0).Type, s.Get(0).Data, s.Text())
 	if s.Get(0).Data != "span" && s.Children().Length() > 0 {
 		s.Children().Each(func(index int, item *goquery.Selection) {
 			allText += extractText(item, splitter)
