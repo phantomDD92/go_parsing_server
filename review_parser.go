@@ -300,6 +300,13 @@ func parseReview(doc *goquery.Document) ReviewResult {
 			data.Reviews = append(data.Reviews, reviewInfo)
 		})
 	}
+	paginationTags := doc.Find("#cm_cr-pagination_bar").Find("a")
+	if paginationTags.Length() > 0 {
+		paginationTags.Each(func(i int, s *goquery.Selection) {
+			url := normalizeUrl(baseUrl, s.AttrOr("href", ""))
+			data.Pagination = append(data.Pagination, url)
+		})
+	}
 	result.Data = data
 	result.Status = "parse_successful"
 	return result
