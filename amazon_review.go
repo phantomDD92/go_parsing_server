@@ -7,7 +7,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type ReviewProduct struct {
+type AmazonReviewProduct struct {
 	URL       string            `json:"url"`
 	Name      string            `json:"name"`
 	Brand     string            `json:"brand"`
@@ -16,7 +16,7 @@ type ReviewProduct struct {
 	Variation map[string]string `json:"variation"`
 }
 
-type ReviewInfo struct {
+type AmazonReviewInfo struct {
 	Stars               int               `json:"stars"`
 	Date                string            `json:"date"`
 	VerifiedPurchase    bool              `json:"verified_purchase"`
@@ -32,30 +32,30 @@ type ReviewInfo struct {
 	VideoURL            string            `json:"videoUrl"`
 }
 
-type ReviewData struct {
-	AverageRating       float64       `json:"average_rating"`
-	TotalReviews        int           `json:"total_reviews"`
-	FiveStarRatings     int           `json:"5_star_ratings"`
-	FiveStarPercentage  float64       `json:"5_star_percentage"`
-	FourStarRatings     int           `json:"4_star_ratings"`
-	FourStarPercentage  float64       `json:"4_star_percentage"`
-	ThreeStarRatings    int           `json:"3_star_ratings"`
-	ThreeStarPercentage float64       `json:"3_star_percentage"`
-	TwoStarRatings      int           `json:"2_star_ratings"`
-	TwoStarPercentage   float64       `json:"2_star_percentage"`
-	OneStarRatings      int           `json:"1_star_ratings"`
-	OneStarPercentage   float64       `json:"1_star_percentage"`
-	Product             ReviewProduct `json:"product"`
-	TopPositiveReview   ReviewInfo    `json:"top_positive_review"`
-	TopCriticalReview   ReviewInfo    `json:"top_critical_review"`
-	Reviews             []ReviewInfo  `json:"reviews"`
-	Pagination          []string      `json:"pagination"`
+type AmazonReviewData struct {
+	AverageRating       float64             `json:"average_rating"`
+	TotalReviews        int                 `json:"total_reviews"`
+	FiveStarRatings     int                 `json:"5_star_ratings"`
+	FiveStarPercentage  float64             `json:"5_star_percentage"`
+	FourStarRatings     int                 `json:"4_star_ratings"`
+	FourStarPercentage  float64             `json:"4_star_percentage"`
+	ThreeStarRatings    int                 `json:"3_star_ratings"`
+	ThreeStarPercentage float64             `json:"3_star_percentage"`
+	TwoStarRatings      int                 `json:"2_star_ratings"`
+	TwoStarPercentage   float64             `json:"2_star_percentage"`
+	OneStarRatings      int                 `json:"1_star_ratings"`
+	OneStarPercentage   float64             `json:"1_star_percentage"`
+	Product             AmazonReviewProduct `json:"product"`
+	TopPositiveReview   AmazonReviewInfo    `json:"top_positive_review"`
+	TopCriticalReview   AmazonReviewInfo    `json:"top_critical_review"`
+	Reviews             []AmazonReviewInfo  `json:"reviews"`
+	Pagination          []string            `json:"pagination"`
 }
 
-type ReviewResult struct {
-	Data   ReviewData `json:"data"`
-	Status string     `json:"status"`
-	URL    string     `json:"url"`
+type AmazonReviewResult struct {
+	Data   AmazonReviewData `json:"data"`
+	Status string           `json:"status"`
+	URL    string           `json:"url"`
 }
 
 func extractVariation(variationTag *goquery.Selection) map[string]string {
@@ -73,8 +73,8 @@ func extractVariation(variationTag *goquery.Selection) map[string]string {
 	return variationMap
 }
 
-func parseReviewSummary(reviewTag *goquery.Selection, baseUrl string) ReviewInfo {
-	var info ReviewInfo
+func parseReviewSummary(reviewTag *goquery.Selection, baseUrl string) AmazonReviewInfo {
+	var info AmazonReviewInfo
 	profileTag := reviewTag.Find(".a-profile").First()
 	if profileTag.Length() > 0 {
 		info.Username = normalizeText(profileTag.Find("span").First().Text())
@@ -126,8 +126,8 @@ func parseReviewSummary(reviewTag *goquery.Selection, baseUrl string) ReviewInfo
 	return info
 }
 
-func parseReviewInfo(reviewTag *goquery.Selection, baseUrl string) ReviewInfo {
-	var info ReviewInfo
+func parseReviewInfo(reviewTag *goquery.Selection, baseUrl string) AmazonReviewInfo {
+	var info AmazonReviewInfo
 	profileTag := reviewTag.Find(".a-profile").First()
 	if profileTag.Length() > 0 {
 		info.Username = normalizeText(profileTag.Find("span").First().Text())
@@ -201,9 +201,9 @@ func parseReviewInfo(reviewTag *goquery.Selection, baseUrl string) ReviewInfo {
 	return info
 }
 
-func parseReview(doc *goquery.Document) ReviewResult {
-	var result ReviewResult
-	var data ReviewData
+func parseReview(doc *goquery.Document) AmazonReviewResult {
+	var result AmazonReviewResult
+	var data AmazonReviewData
 	baseUrl := "https://www.amazon.com"
 	// url
 	href, exists := doc.Find("link[rel='canonical']").Attr("href")

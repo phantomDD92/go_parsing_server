@@ -7,7 +7,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type ProductData struct {
+type AmazonProductData struct {
 	AplusPresent           bool                   `json:"aplus_present"`
 	AvailabilityStatus     string                 `json:"availability_status"`
 	AverageRating          float64                `json:"average_rating"`
@@ -32,10 +32,10 @@ type ProductData struct {
 	TotalAnsweredQuestions interface{}            `json:"total_answered_questions"`
 }
 
-type ProductResult struct {
-	Data   ProductData `json:"data"`
-	Status string      `json:"status"`
-	URL    string      `json:"url"`
+type AmazonProductResult struct {
+	Data   AmazonProductData `json:"data"`
+	Status string            `json:"status"`
+	URL    string            `json:"url"`
 }
 
 func parseBtn(btn *goquery.Selection, first bool) map[string]interface{} {
@@ -58,9 +58,9 @@ func parseBtn(btn *goquery.Selection, first bool) map[string]interface{} {
 	return record
 }
 
-func parseProduct(doc *goquery.Document) ProductResult {
-	var result ProductResult
-	var data ProductData
+func parseProduct(doc *goquery.Document) AmazonProductResult {
+	var result AmazonProductResult
+	var data AmazonProductData
 	baseUrl := "https://www.amazon.com"
 	// url
 	href, exists := doc.Find("link[rel='canonical']").Attr("href")

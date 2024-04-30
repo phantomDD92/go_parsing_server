@@ -104,7 +104,7 @@ SEARCH_RESULT_CRITICAL_FILEDS = [
 ]
 
 
-class ApiTester():
+class AmazonApiTester():
     def __init__(self) -> None:
         pass
     
@@ -177,7 +177,7 @@ class ApiTester():
         try:
             with open(filepath, 'r', encoding="utf-8") as f:
                 html = f.read()
-            resp = requests.post("http://localhost:8080/post", json={
+            resp = requests.post("http://localhost:8080/amazon", json={
                 "url": "url",
                 "html": html
             })        
@@ -200,7 +200,7 @@ def main():
     if not os.path.exists(filepath):
         print(f"ERROR : ${filepath} does not exist.")
         exit()
-    tester = ApiTester()
+    tester = AmazonApiTester()
     tester.start(filepath)
     
 if __name__ == "__main__":

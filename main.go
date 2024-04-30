@@ -63,7 +63,7 @@ func parseAndSave(filename string) bool {
 	}
 }
 
-func handlePost(c *gin.Context) {
+func handleAmazonPost(c *gin.Context) {
 	var postData PostData
 	// Get post data
 	if err := c.BindJSON(&postData); err != nil {
@@ -89,7 +89,7 @@ func handlePost(c *gin.Context) {
 }
 
 func main() {
-	// parseAndSave("review1")
+	// parseAndSave("review")
 	r := gin.Default()
 	r.MaxMultipartMemory = 512 << 20 // 8 MiB
 	// Define a route and its handler
@@ -100,7 +100,7 @@ func main() {
 	})
 
 	// Define a POST route and its handler
-	r.POST("/post", handlePost)
+	r.POST("/amazon", handleAmazonPost)
 
 	srv := &http.Server{
 		Addr:           ":8080",

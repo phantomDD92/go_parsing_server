@@ -7,7 +7,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type AdsItem struct {
+type AmazonAdsInfo struct {
 	ASIN           string  `json:"asin"`
 	HasPrime       bool    `json:"has_prime"`
 	Image          string  `json:"image"`
@@ -21,7 +21,7 @@ type AdsItem struct {
 	URL            string  `json:"url"`
 }
 
-type SearchItem struct {
+type AmazonSearchInfo struct {
 	ASIN           string  `json:"asin"`
 	HasPrime       bool    `json:"has_prime"`
 	Image          string  `json:"image"`
@@ -39,17 +39,17 @@ type SearchItem struct {
 	URL            string  `json:"url"`
 }
 
-type SearchData struct {
-	Ads              []AdsItem     `json:"ads"`
-	ExploreMoreItems []interface{} `json:"explore_more_items"`
-	NextPages        []string      `json:"next_pages"`
-	Results          []SearchItem  `json:"results"`
+type AmazonSearchData struct {
+	Ads              []AmazonAdsInfo    `json:"ads"`
+	ExploreMoreItems []interface{}      `json:"explore_more_items"`
+	NextPages        []string           `json:"next_pages"`
+	Results          []AmazonSearchInfo `json:"results"`
 }
 
-type SearchResult struct {
-	Data   SearchData `json:"data"`
-	Status string     `json:"status"`
-	URL    string     `json:"url"`
+type AmazonSearchResult struct {
+	Data   AmazonSearchData `json:"data"`
+	Status string           `json:"status"`
+	URL    string           `json:"url"`
 }
 
 func replacePage(path string, page int) string {
@@ -64,8 +64,8 @@ func replacePage(path string, page int) string {
 	return strings.Join(pathsegs, "&")
 }
 
-func getAdsItem(s *goquery.Selection) AdsItem {
-	var record AdsItem
+func getAdsItem(s *goquery.Selection) AmazonAdsInfo {
+	var record AmazonAdsInfo
 	asin := s.AttrOr("data-asin", "")
 	record.ASIN = asin
 	if asin != "" {
@@ -95,8 +95,8 @@ func getAdsItem(s *goquery.Selection) AdsItem {
 	return record
 }
 
-func getSearchItem(s *goquery.Selection, baseUrl string, pos int) SearchItem {
-	var record SearchItem
+func getSearchItem(s *goquery.Selection, baseUrl string, pos int) AmazonSearchInfo {
+	var record AmazonSearchInfo
 	asin := s.AttrOr("data-asin", "")
 	record.ASIN = asin
 	if asin != "" {
@@ -161,9 +161,9 @@ func getSearchItem(s *goquery.Selection, baseUrl string, pos int) SearchItem {
 	return record
 }
 
-func parseSearch(doc *goquery.Document) SearchResult {
-	var result SearchResult
-	var data SearchData
+func parseSearch(doc *goquery.Document) AmazonSearchResult {
+	var result AmazonSearchResult
+	var data AmazonSearchData
 	baseUrl := "https://www.amazon.com"
 	pos := 1
 	resultsTag := doc.Find(".s-search-results").First()
