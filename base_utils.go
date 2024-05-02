@@ -1,7 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -55,7 +60,10 @@ func getBaseUrl(url string) string {
 }
 
 func normalizeUrl(baseurl string, path string) string {
-	if path != "" {
+
+	if path[:4] == "http" {
+		return strings.ReplaceAll(path, "\u0026", "&")
+	} else if path != "" {
 		return strings.ReplaceAll(baseurl+path, "\u0026", "&")
 	}
 	return ""
@@ -103,4 +111,58 @@ func convertTableToMap(s *goquery.Selection) map[string]string {
 	})
 	// Print the map
 	return dataMap
+}
+
+func saveJsonFile(result interface{}, filename string) bool {
+	// Marshal the struct into JSON
+	jsonData, err := json.MarshalIndent(result, "", "\t")
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return false
+	}
+	// Write the JSON data to a file
+	file, err := os.Create("./data/" + filename + ".json")
+	if err != nil {
+		fmt.Println("Error creating file:", err)
+		return false
+	}
+	defer file.Close()
+	_, err = file.Write(jsonData)
+	if err != nil {
+		fmt.Println("Error writing JSON to file:", err)
+		return false
+	}
+	return true
+}
+
+func extractIntFromPattern(text string, pattern string) (int, error) {
+	// Compile the regular expression pattern
+	re := regexp.MustCompile(pattern)
+	// Find all matches of the pattern in the input string
+	matches := re.FindAllStringSubmatch(text, -1)
+	// Extract the first match (which should be the number)
+	var result string
+	if len(matches) > 0 {
+		result = matches[0][1]
+	} else {
+		return 0, errors.New("Pattern not found")
+	}
+	num, err := strconv.Atoi(strings.ReplaceAll(result, ",", ""))
+	return num, err
+}
+
+func extractFloatFromPattern(text string, pattern string) (float64, error) {
+	// Compile the regular expression pattern
+	re := regexp.MustCompile(pattern)
+	// Find all matches of the pattern in the input string
+	matches := re.FindAllStringSubmatch(text, -1)
+	// Extract the first match (which should be the number)
+	var result string
+	if len(matches) > 0 {
+		result = matches[0][1]
+	} else {
+		return 0, errors.New("Pattern not found")
+	}
+	num, err := strconv.ParseFloat(strings.ReplaceAll(result, ",", ""), 64)
+	return num, err
 }

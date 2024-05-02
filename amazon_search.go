@@ -161,7 +161,7 @@ func getSearchItem(s *goquery.Selection, baseUrl string, pos int) AmazonSearchIn
 	return record
 }
 
-func parseSearch(doc *goquery.Document) AmazonSearchResult {
+func parseAmazonSearch(doc *goquery.Document) AmazonSearchResult {
 	var result AmazonSearchResult
 	var data AmazonSearchData
 	baseUrl := "https://www.amazon.com"
@@ -199,7 +199,7 @@ func parseSearch(doc *goquery.Document) AmazonSearchResult {
 	return result
 }
 
-func isSearchPage(doc *goquery.Document) bool {
+func isAmazonSearch(doc *goquery.Document) bool {
 	var mainElement = doc.Find("#search")
 	return mainElement.Length() > 0
 }

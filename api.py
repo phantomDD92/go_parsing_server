@@ -103,7 +103,6 @@ SEARCH_RESULT_CRITICAL_FILEDS = [
     "total_reviews",
 ]
 
-
 class AmazonApiTester():
     def __init__(self) -> None:
         pass
@@ -173,35 +172,40 @@ class AmazonApiTester():
     def hasData(self, result):
         return result.get("data", None) != None
     
-    def start(self, filepath):
+    def start(self, endpoint, filepath):
         try:
             with open(filepath, 'r', encoding="utf-8") as f:
                 html = f.read()
-            resp = requests.post("http://localhost:8080/amazon", json={
+            resp = requests.post(f"http://localhost:8080/{endpoint}", json={
                 "url": "url",
                 "html": html
             })        
-            result = resp.json()
-            self.saveResponse(filepath, result)
-            if not self.hasData(result):
+            if resp.status_code != 200:
                 print(f"ERROR : Html Parsing is failed")
                 return
-            print(f"Overall Coverage Score(0~1) : {self.overallScore(result["data"]):.2f}")
-            print(f"Critical Coverage Score(0~1) : {self.criticalScore(result["data"]):.2f}")
+            result = resp.json()
+            self.saveResponse(filepath, result)
+            if endpoint == "amazon":
+                print(f"Overall Coverage Score(0~1) : {self.overallScore(result["data"]):.2f}")
+                print(f"Critical Coverage Score(0~1) : {self.criticalScore(result["data"]):.2f}")
 
         except Exception as e:
             print(f"ERROR : Api Test is failed due to {str(e)}")
         
 def main():
-    if len(sys.argv) != 2:
-        print("USAGE : $ python apitester.py <htmlfile>")
+    if len(sys.argv) != 3:
+        print("USAGE : $ python apitester.py [amazon|google] <htmlfile>")
         exit()
-    filepath = sys.argv[1]
+    endpoint = sys.argv[1]
+    if endpoint != "amazon" and endpoint != "google":
+        print("USAGE : $ python apitester.py [amazon|google] <htmlfile>")
+        exit()
+    filepath = sys.argv[2]
     if not os.path.exists(filepath):
         print(f"ERROR : ${filepath} does not exist.")
         exit()
     tester = AmazonApiTester()
-    tester.start(filepath)
+    tester.start(endpoint, filepath)
     
 if __name__ == "__main__":
     main()

@@ -201,7 +201,7 @@ func parseReviewInfo(reviewTag *goquery.Selection, baseUrl string) AmazonReviewI
 	return info
 }
 
-func parseReview(doc *goquery.Document) AmazonReviewResult {
+func parseAmazonReview(doc *goquery.Document) AmazonReviewResult {
 	var result AmazonReviewResult
 	var data AmazonReviewData
 	baseUrl := "https://www.amazon.com"
@@ -312,7 +312,7 @@ func parseReview(doc *goquery.Document) AmazonReviewResult {
 	return result
 }
 
-func isReviewPage(doc *goquery.Document) bool {
+func isAmazonReview(doc *goquery.Document) bool {
 	var mainElement = doc.Find("#cm_cr-product_info")
 	return mainElement.Length() > 0
 }
