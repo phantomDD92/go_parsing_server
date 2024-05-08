@@ -20,13 +20,13 @@ func handleWalmartHtml(filename string) bool {
 		println(err)
 		return false
 	}
-	result := parseWalmartSearch(doc)
+	result := Walmart_SearchPageScraper(doc)
 	// return true
 	return saveJsonFile(result, filename)
 }
 
-func handleWalmartPost(c *gin.Context) {
-	var postData PostData
+func Walmart_PostRequest(c *gin.Context) {
+	var postData RequestData
 	// Get post data
 	if err := c.BindJSON(&postData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -39,7 +39,8 @@ func handleWalmartPost(c *gin.Context) {
 		return
 	}
 	var result interface{}
-	result = parseWalmartSearch(doc)
-	// saveJsonFile(result, "result")
+	result = Walmart_SearchPageScraper(doc)
+	// id := uuid.New()
+	// saveJsonFile(result, id.String())
 	c.JSON(http.StatusOK, result)
 }

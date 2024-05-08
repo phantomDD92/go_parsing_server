@@ -58,7 +58,7 @@ func parseBtn(btn *goquery.Selection, first bool) map[string]interface{} {
 	return record
 }
 
-func parseAmazonProduct(doc *goquery.Document) AmazonProductResult {
+func Amazon_ProductPagesScraper(doc *goquery.Document) AmazonProductResult {
 	var result AmazonProductResult
 	var data AmazonProductData
 	baseUrl := "https://www.amazon.com"

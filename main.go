@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type PostData struct {
+type RequestData struct {
 	Url  string `json:"url"`
 	Html string `json:"html"`
 }
@@ -30,9 +30,9 @@ func main() {
 	})
 
 	// Define a POST route and its handler
-	r.POST("/amazon", handleAmazonPost)
-	r.POST("/google", handleGooglePost)
-	r.POST("/walmart", handleWalmartPost)
+	r.POST("/amazon", Amazon_PostRequest)
+	r.POST("/google", Google_PostRequest)
+	r.POST("/walmart", Walmart_PostRequest)
 
 	srv := &http.Server{
 		Addr:           ":8080",

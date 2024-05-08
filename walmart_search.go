@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"net/url"
+	"strconv"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -275,12 +277,21 @@ type WalmartSearchData struct {
 	Tiles             []WalmartSearchTile    `json:"takeover_tiles"`
 	Pills             []WalmartSearchPill    `json:"search_pills"`
 	Banner            WalmartSearchBanner    `json:"search_banner"`
+	Pagination        struct {
+		PageCount   int      `json:"page_count"`
+		CurrentPage int      `json:"current_page"`
+		PageLinks   []string `json:"page_links"`
+	} `json:"pagination"`
 }
 
 type WalmartSearchResult struct {
 	Data   WalmartSearchData `json:"data"`
 	Status string            `json:"status"`
 	URL    string            `json:"url"`
+}
+
+func normalizeWalmartImage(url string) string {
+	return strings.Split(url, "?")[0]
 }
 
 func makeUrl(path string, params map[string]string) string {
@@ -298,7 +309,7 @@ func parseWalmartSearchTile(item WalmartSearchRawItem) WalmartSearchTile {
 	var tile WalmartSearchTile
 	tile.Title = item.TileTakeOverTile.Title
 	tile.Subtitle = item.TileTakeOverTile.Subtitle
-	tile.Image = item.TileTakeOverTile.Image.Src
+	tile.Image = normalizeWalmartImage(item.TileTakeOverTile.Image.Src)
 	if len(item.TileTakeOverTile.TileCta) > 0 {
 		tile.Link.Title = item.TileTakeOverTile.TileCta[0].CtaLink.Title
 		tile.Link.Url = item.TileTakeOverTile.TileCta[0].CtaLink.ClickThrough.Value
@@ -317,7 +328,7 @@ func parseWalmartSearchProduct(item WalmartSearchRawItem, position int, baseUrl 
 	for _, value := range item.FulfillmentBadgeGroups {
 		product.Fulfillment = append(product.Fulfillment, value.Text+value.SlaText)
 	}
-	product.Image = item.Image
+	product.Image = normalizeWalmartImage(item.Image)
 	product.ImageSize = item.ImageSize
 	product.IsBuyNow = item.ShowBuyNow
 	product.IsEligible = item.SnapEligible
@@ -346,7 +357,7 @@ func parseWalmartPills(config WalmartRawConfigs) []WalmartSearchPill {
 	var pills []WalmartSearchPill
 	for _, value := range config.Pills {
 		var pill WalmartSearchPill
-		pill.Image = value.Image.Src
+		pill.Image = normalizeWalmartImage(value.Image.Src)
 		pill.Title = value.Title
 		pill.URL = value.Url
 		pills = append(pills, pill)
@@ -360,11 +371,11 @@ func parseWalmartBanner(config WalmartRawConfigs) WalmartSearchBanner {
 	banner.URL = config.ViewConfig.Url
 	banner.Button = config.ViewConfig.UrlAlt
 	banner.Description = config.ViewConfig.Description
-	banner.Image = config.ViewConfig.Image
+	banner.Image = normalizeWalmartImage(config.ViewConfig.Image)
 	return banner
 }
 
-func parseWalmartSearch(doc *goquery.Document) WalmartSearchResult {
+func Walmart_SearchPageScraper(doc *goquery.Document) WalmartSearchResult {
 	var raw WalmartSearchRawResult
 	var result WalmartSearchResult
 	var data WalmartSearchData
@@ -402,7 +413,17 @@ func parseWalmartSearch(doc *goquery.Document) WalmartSearchResult {
 		data.TotalCount = itemStack.Count
 		data.TotalCountDisplay = itemStack.TotalItemCountDisplay
 		data.Query = raw.Query
+		pagination := raw.Props.PageProps.InitialData.SearchResult.Pagination
+		data.Pagination.CurrentPage = pagination.Properties.Page
+		data.Pagination.PageCount = pagination.MaxPage
 		result.URL = makeUrl(baseUrl+raw.Page, raw.Query)
+		for i := 1; i <= pagination.MaxPage; i++ {
+			link := result.URL + "&affinityOverride=" + pagination.Properties.AffinityOverride
+			if i != 1 {
+				link += "&page=" + strconv.Itoa(i)
+			}
+			data.Pagination.PageLinks = append(data.Pagination.PageLinks, link)
+		}
 	}
 	result.Data = data
 	result.Status = "parse_successful"

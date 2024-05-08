@@ -20,12 +20,12 @@ func handleGoogleHtml(filename string) bool {
 		println(err)
 		return false
 	}
-	result := parseGoogleSearch(doc)
+	result := Google_SearchPagesScraper(doc)
 	return saveJsonFile(result, filename)
 }
 
-func handleGooglePost(c *gin.Context) {
-	var postData PostData
+func Google_PostRequest(c *gin.Context) {
+	var postData RequestData
 	// Get post data
 	if err := c.BindJSON(&postData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -38,7 +38,7 @@ func handleGooglePost(c *gin.Context) {
 		return
 	}
 	var result interface{}
-	result = parseGoogleSearch(doc)
+	result = Google_SearchPagesScraper(doc)
 	// saveJsonFile(result, "result")
 	c.JSON(http.StatusOK, result)
 }

@@ -21,20 +21,20 @@ func handleAmazonHtml(filename string) bool {
 		println(err)
 		return false
 	}
-	if isAmazonSearch(doc) {
-		result := parseAmazonSearch(doc)
+	if Amazon_IsSearchPage(doc) {
+		result := Amazon_SearchPagesScraper(doc)
 		return saveJsonFile(result, filename)
-	} else if isAmazonReview(doc) {
-		result := parseAmazonReview(doc)
+	} else if Amazon_IsReviewPage(doc) {
+		result := Amazon_ReviewPagesScraper(doc)
 		return saveJsonFile(result, filename)
 	} else {
-		result := parseAmazonProduct(doc)
+		result := Amazon_ProductPagesScraper(doc)
 		return saveJsonFile(result, filename)
 	}
 }
 
-func handleAmazonPost(c *gin.Context) {
-	var postData PostData
+func Amazon_PostRequest(c *gin.Context) {
+	var postData RequestData
 	// Get post data
 	if err := c.BindJSON(&postData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -47,12 +47,12 @@ func handleAmazonPost(c *gin.Context) {
 		return
 	}
 	var result interface{}
-	if isAmazonSearch(doc) {
-		result = parseAmazonSearch(doc)
-	} else if isAmazonReview(doc) {
-		result = parseAmazonReview(doc)
+	if Amazon_IsSearchPage(doc) {
+		result = Amazon_SearchPagesScraper(doc)
+	} else if Amazon_IsReviewPage(doc) {
+		result = Amazon_ReviewPagesScraper(doc)
 	} else {
-		result = parseAmazonProduct(doc)
+		result = Amazon_ProductPagesScraper(doc)
 	}
 	// saveJsonFile(result, "result")
 	c.JSON(http.StatusOK, result)

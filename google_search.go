@@ -21,11 +21,6 @@ const PATTERN_TIME_TAKEN = `\((\d+(\.\d+)?) seconds\)`
 
 type GoogleLink map[string]string
 
-type GooglePageUrl struct {
-	Page int    `json:"page"`
-	Url  string `json:"url"`
-}
-
 type GoogleSiteLinks struct {
 	Inline []GoogleLink `json:"inline"`
 	Block  []GoogleLink `json:"block"`
@@ -332,7 +327,7 @@ func parseRelatedSearches(tag *goquery.Selection, baseUrl string) []GoogleLink {
 	return relatedSearchs
 }
 
-func parseGoogleSearch(doc *goquery.Document) GoogleSearchResult {
+func Google_SearchPagesScraper(doc *goquery.Document) GoogleSearchResult {
 	var result GoogleSearchResult
 	// Get base url
 	baseUrl := "https://www.goolge.ca"
