@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,8 +14,13 @@ type PostData struct {
 }
 
 func main() {
-	// handleGoogleHtml("google-search-vpn")
+	// handleWalmartHtml("walmart-search-cake")
 	r := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}                      // Allow all origins
+	config.AllowMethods = []string{"GET", "POST", "OPTIONS"} // Allow GET, POST, OPTIONS methods
+	config.AllowHeaders = []string{"Origin", "Content-Type"} // Allow Origin and Content-Type headers
+	r.Use(cors.New(config))
 	r.MaxMultipartMemory = 512 << 20 // 8 MiB
 	// Define a route and its handler
 	r.GET("/", func(c *gin.Context) {
@@ -26,6 +32,7 @@ func main() {
 	// Define a POST route and its handler
 	r.POST("/amazon", handleAmazonPost)
 	r.POST("/google", handleGooglePost)
+	r.POST("/walmart", handleWalmartPost)
 
 	srv := &http.Server{
 		Addr:           ":8080",

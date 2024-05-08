@@ -181,7 +181,7 @@ class AmazonApiTester():
                 "html": html
             })        
             if resp.status_code != 200:
-                print(f"ERROR : Html Parsing is failed")
+                print(f"ERROR : Html ParOvesing is failed")
                 return
             result = resp.json()
             self.saveResponse(filepath, result)
@@ -197,7 +197,7 @@ def main():
         print("USAGE : $ python apitester.py [amazon|google] <htmlfile>")
         exit()
     endpoint = sys.argv[1]
-    if endpoint != "amazon" and endpoint != "google":
+    if endpoint != "amazon" and endpoint != "google" and endpoint != "walmart":
         print("USAGE : $ python apitester.py [amazon|google] <htmlfile>")
         exit()
     filepath = sys.argv[2]
