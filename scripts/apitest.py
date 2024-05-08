@@ -1,6 +1,16 @@
 import requests
+import json
 import numpy as np
 import datetime
+
+TEST_URLS = [
+    { "url" : 
+        "https://www.walmart.com/search?q=travel%20organizer&sort=best_match&affinityOverride=default&page=2",
+        # "https://www.walmart.com/search?catId=976759&facet=brand%3AMarketside&q=cake&sort=best_seller",
+        # "https://www.walmart.com/search?q=metal%20garden%20hose&sort=best_match&affinityOverride=default&page=3",
+        # "https://www.walmart.com/search?q=travel%20bags%20for%20luggage&sort=best_match&affinityOverride=default&page=2",
+    }
+]
 
 CURRENT_TEST = "walmart-search"
 TEST_CONFIG = {
@@ -15,7 +25,7 @@ API_KEY_PROXY = "d0f35644-3095-48f9-b109-9146894ae581"
 
 WALMART_SEARCH_FIELDS = [
     {"name": "data", "critical": True, "weight" : 5, "children" : [
-        {"name": "results", "critical": True, "weight" : 5, "children" : [
+        {"name": "results", "critical": True, "weight" : 10, "children" : [
             {"name": "position", "critical": True },
             {"name": "id", "critical": True},
             {"name": "item_id"},
@@ -44,6 +54,11 @@ WALMART_SEARCH_FIELDS = [
         {"name": "total_count", "critical": True, "weight" : 3},
         {"name": "search_query", "critical": True, "weight" : 2},
         {"name": "total_count_display"},
+        {"name": "pagination", "critical": True, "weight" : 3, "children": [
+            {"name": "page_count", "critical": True },
+            {"name": "current_page", "critical": True },
+            {"name": "page_links", "critical": True },
+        ]},
         {"name": "takeover_tiles", "weight" : 2, "children": [
             {"name": "title" },
             {"name": "subtitle" },
@@ -65,9 +80,7 @@ WALMART_SEARCH_FIELDS = [
             {"name": "description" },
             {"name": "button" },
         ]},
-    ]},
-    {"name": "status", "critical": True},
-    {"name": "url", "critical": True},
+    ]}
 ]
 
 def is_empty(value):
@@ -122,10 +135,13 @@ def calculate_fields(fields, record):
         overall_total_sum += overall * childField.get("weight", 1)
         critical_total_max += childField.get("weight", 1) if childField.get("critical", False) else 0.0
         critical_total_sum += critical * childField.get("weight", 1) if childField.get("critical", False) else 0.0
-        # print(f"# {childField.get("name", "unknown")} * {childField.get("weight", 1)}: {overall}: {critical} : {overall_total_max} : {overall_total_sum}: {critical_total_max} : {critical_total_sum}")
+        if childField.get("critical", False):
+            print(f"*** {overall:.2f}: {critical:.2f} : {childField.get("name", "unknown")} * {childField.get("weight", 1)} : {overall_total_max:.2f} : {overall_total_sum:.2f}: {critical_total_max:.2f} : {critical_total_sum:.2f}")
+        else:
+            print(f"--- {overall:.2f}: {critical:.2f} : {childField.get("name", "unknown")} * {childField.get("weight", 1)} : {overall_total_max:.2f} : {overall_total_sum:.2f}: {critical_total_max:.2f} : {critical_total_sum:.2f}")
     overall_score = overall_total_sum / overall_total_max
     critical_score = critical_total_sum / critical_total_max if critical_total_max > 0 else 1.0
-    # print(f"--- : {overall_score}: {critical_score}")
+    print(f"### : {overall_score:.2f}: {critical_score:.2f}")
     return overall_score, critical_score
 
 def calculate_score(result):
@@ -134,7 +150,9 @@ def calculate_score(result):
     else:
         return 0.0, 0.0
 
-def save_result(name):
+def save_result(result):
+    with open("../data/result.json", "w", encoding="utf-8") as f:
+        json.dump(result, fp=f, indent="\t")
     pass
 
 def extract_sample_urls():
@@ -161,7 +179,7 @@ def gather_html(url):
 
 def parse_html(html):
     try:
-        resp = requests.post(f"http://localhost:8080/{TEST_CONFIG[CURRENT_TEST]["endpoint"]}", json={
+        resp = requests.post(f"http://localhost:8080/v2/{TEST_CONFIG[CURRENT_TEST]["endpoint"]}", json={
             "url": "url",
             "html": html
         })        
@@ -178,7 +196,9 @@ def write_log(log):
         print(f"{datetime.datetime.now()} : {log}", file=f)
 
 # get sample urls
-sample_urls = extract_sample_urls()
+
+sample_urls = TEST_URLS
+# sample_urls = extract_sample_urls()
 if sample_urls is None:
     print("ERROR : failed to extract sample urls")
     exit()
@@ -193,6 +213,7 @@ for url in sample_urls:
         continue
     count += 1
     result = parse_html(html)
+    save_result(result)
     if result is None:
         overall_scores = np.append(overall_scores, 0)
         critical_scores = np.append(critical_scores, 0)
@@ -202,7 +223,7 @@ for url in sample_urls:
         overall_scores = np.append(overall_scores, overall_score)
         critical_scores = np.append(critical_scores, critical_score)
         print(f"{count} : {overall_score:.2f} : {critical_score:.2f} : {url["url"]}")
-    break
-# with open("./data/walmart-search-cake.json", "r", encoding="utf-8") as f:
+    
+# with open("./data/walmart-search.json", "r", encoding="utf-8") as f:
 #     result = json.load(f)
 # calculate_score(result)
