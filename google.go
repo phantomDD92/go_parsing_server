@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func handleGoogleHtml(filename string) bool {
+func Google_ParseHtml(filename string) bool {
 	content, err := os.ReadFile("./data/" + filename + ".html")
 	if err != nil {
 		println(err)

@@ -14,7 +14,7 @@ type RequestData struct {
 }
 
 func main() {
-	// handleWalmartHtml("walmart-search-cake")
+	// Walmart_ParseHtml("walmart-product")
 	r := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"}                      // Allow all origins

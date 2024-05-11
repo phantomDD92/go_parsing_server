@@ -375,57 +375,63 @@ func parseWalmartBanner(config WalmartRawConfigs) WalmartSearchBanner {
 	return banner
 }
 
-func Walmart_SearchPageScraper(doc *goquery.Document) WalmartSearchResult {
+func Walmart_SearchPageScraper(jsonTag *goquery.Selection) WalmartSearchResult {
 	var raw WalmartSearchRawResult
 	var result WalmartSearchResult
 	var data WalmartSearchData
 	baseUrl := "https://www.walmart.com"
-	dataTag := doc.Find("script#__NEXT_DATA__").First()
-	if dataTag.Length() > 0 {
-		json.Unmarshal([]byte(dataTag.Text()), &raw)
-		baseUrl = raw.RuntimeConfig.Host.Wmt
-		for _, item := range raw.Props.PageProps.InitialData.SearchResult.RelatedSearch {
-			queryLink := make(WalmartLink)
-			queryLink["link"] = baseUrl + raw.Page + "?" + item.Url
-			queryLink["query"] = item.Title
-			data.RelatedSearch = append(data.RelatedSearch, queryLink)
-		}
-		position := 1
-		itemStack := raw.Props.PageProps.InitialData.SearchResult.ItemStacks[0]
-		for _, item := range itemStack.Items {
-			if item.TypeName == "Product" {
-				product := parseWalmartSearchProduct(item, position, baseUrl)
-				data.Results = append(data.Results, product)
-				position += 1
-			} else if item.TypeName == "TileTakeOverProductPlaceholder" {
-				tile := parseWalmartSearchTile(item)
-				data.Tiles = append(data.Tiles, tile)
-			}
-		}
-		modules := raw.Props.PageProps.InitialData.ContentLayout.Modules
-		for _, module := range modules {
-			if module.Type == "PillsModule" {
-				data.Pills = parseWalmartPills(module.Configs)
-			} else if module.Type == "SearchBanner" {
-				data.Banner = parseWalmartBanner(module.Configs)
-			}
-		}
-		data.TotalCount = itemStack.Count
-		data.TotalCountDisplay = itemStack.TotalItemCountDisplay
-		data.Query = raw.Query
-		pagination := raw.Props.PageProps.InitialData.SearchResult.Pagination
-		data.Pagination.CurrentPage = pagination.Properties.Page
-		data.Pagination.PageCount = pagination.MaxPage
-		result.URL = makeUrl(baseUrl+raw.Page, raw.Query)
-		for i := 1; i <= pagination.MaxPage; i++ {
-			link := result.URL + "&affinityOverride=" + pagination.Properties.AffinityOverride
-			if i != 1 {
-				link += "&page=" + strconv.Itoa(i)
-			}
-			data.Pagination.PageLinks = append(data.Pagination.PageLinks, link)
+	// dataTag := doc.Find("script#__NEXT_DATA__").First()
+	// if dataTag.Length() > 0 {
+	json.Unmarshal([]byte(jsonTag.Text()), &raw)
+	baseUrl = raw.RuntimeConfig.Host.Wmt
+	for _, item := range raw.Props.PageProps.InitialData.SearchResult.RelatedSearch {
+		queryLink := make(WalmartLink)
+		queryLink["link"] = baseUrl + raw.Page + "?" + item.Url
+		queryLink["query"] = item.Title
+		data.RelatedSearch = append(data.RelatedSearch, queryLink)
+	}
+	position := 1
+	itemStack := raw.Props.PageProps.InitialData.SearchResult.ItemStacks[0]
+	for _, item := range itemStack.Items {
+		if item.TypeName == "Product" {
+			product := parseWalmartSearchProduct(item, position, baseUrl)
+			data.Results = append(data.Results, product)
+			position += 1
+		} else if item.TypeName == "TileTakeOverProductPlaceholder" {
+			tile := parseWalmartSearchTile(item)
+			data.Tiles = append(data.Tiles, tile)
 		}
 	}
+	modules := raw.Props.PageProps.InitialData.ContentLayout.Modules
+	for _, module := range modules {
+		if module.Type == "PillsModule" {
+			data.Pills = parseWalmartPills(module.Configs)
+		} else if module.Type == "SearchBanner" {
+			data.Banner = parseWalmartBanner(module.Configs)
+		}
+	}
+	data.TotalCount = itemStack.Count
+	data.TotalCountDisplay = itemStack.TotalItemCountDisplay
+	data.Query = raw.Query
+	pagination := raw.Props.PageProps.InitialData.SearchResult.Pagination
+	data.Pagination.CurrentPage = pagination.Properties.Page
+	data.Pagination.PageCount = pagination.MaxPage
+	result.URL = makeUrl(baseUrl+raw.Page, raw.Query)
+	for i := 1; i <= pagination.MaxPage; i++ {
+		link := result.URL + "&affinityOverride=" + pagination.Properties.AffinityOverride
+		if i != 1 {
+			link += "&page=" + strconv.Itoa(i)
+		}
+		data.Pagination.PageLinks = append(data.Pagination.PageLinks, link)
+	}
+	// }
 	result.Data = data
 	result.Status = "parse_successful"
 	return result
+}
+
+func Walmart_IsSearchPage(jsonTag *goquery.Selection) bool {
+	var page WRawResult
+	json.Unmarshal([]byte(jsonTag.Text()), &page)
+	return page.Page != "" && strings.Split(page.Page, "/")[1] == "search"
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"strings"
@@ -9,7 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func handleWalmartHtml(filename string) bool {
+type WRawResult struct {
+	Page string `json:"page"`
+}
+
+func Walmart_ParseHtml(filename string) bool {
 	content, err := os.ReadFile("./data/" + filename + ".html")
 	if err != nil {
 		println(err)
@@ -20,9 +25,29 @@ func handleWalmartHtml(filename string) bool {
 		println(err)
 		return false
 	}
-	result := Walmart_SearchPageScraper(doc)
+	json, err := Walmart_ExtractJson(doc)
+	if err != nil {
+		println(err)
+		return false
+	}
+	var result interface{}
+	if Walmart_IsSearchPage(json) {
+		result = Walmart_SearchPageScraper(json)
+	} else if Walmart_IsProductPage(json) {
+		result = Walmart_ProductPageScraper(json)
+	} else {
+		return false
+	}
 	// return true
 	return saveJsonFile(result, filename)
+}
+
+func Walmart_ExtractJson(doc *goquery.Document) (*goquery.Selection, error) {
+	jsonTag := doc.Find("script#__NEXT_DATA__").First()
+	if jsonTag.Length() > 0 {
+		return jsonTag, nil
+	}
+	return nil, errors.New("parsing failed")
 }
 
 func Walmart_PostRequest(c *gin.Context) {
@@ -38,8 +63,20 @@ func Walmart_PostRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	json, err := Walmart_ExtractJson(doc)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	var result interface{}
-	result = Walmart_SearchPageScraper(doc)
+	if Walmart_IsSearchPage(json) {
+		result = Walmart_SearchPageScraper(json)
+	} else if Walmart_IsProductPage(json) {
+		result = Walmart_ProductPageScraper(json)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported page"})
+		return
+	}
 	// id := uuid.New()
 	// saveJsonFile(result, id.String())
 	c.JSON(http.StatusOK, result)

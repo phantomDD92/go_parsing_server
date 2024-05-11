@@ -5,24 +5,54 @@ import datetime
 
 TEST_URLS = [
     { "url" : 
-        "https://www.walmart.com/search?q=travel%20organizer&sort=best_match&affinityOverride=default&page=2",
+        "https://www.walmart.com/ip/-/138716571",
         # "https://www.walmart.com/search?catId=976759&facet=brand%3AMarketside&q=cake&sort=best_seller",
         # "https://www.walmart.com/search?q=metal%20garden%20hose&sort=best_match&affinityOverride=default&page=3",
         # "https://www.walmart.com/search?q=travel%20bags%20for%20luggage&sort=best_match&affinityOverride=default&page=2",
     }
 ]
 
-CURRENT_TEST = "walmart-search"
+CURRENT_TEST = "walmart-product"
+# CURRENT_TEST = "walmart-search"
+# CURRENT_TEST = "google-search"
+SAMPLE_COUNT = 1
+# SAMPLE_COUNT = 1000
+
+### Settings for api key
+API_ENDPOINT_URL = "https://proxy.scrapeops.io/v1/sample-urls"
+API_KEY_URL = "81a3edae-ece8-47ed-a672-13e7961a6fcc"
+
+API_ENDPOINT_PROXY = 'https://proxy.scrapeops.io/v1/'
+API_KEY_PROXY = "d0f35644-3095-48f9-b109-9146894ae581"
+
+### Settings for test config
 TEST_CONFIG = {
     "walmart-search": {
         "url": "*walmart.com/search*",
         "domain": "walmart.com",
         "endpoint": "walmart",
+    },
+    "walmart-product": {
+        "url": "*walmart.com/ip/*",
+        "domain": "walmart.com",
+        "endpoint": "walmart",
+    },
+    "google-search": {
+        "url": "*google.com/search?*",
+        "domain": "google.com",
+        "endpoint": "google",
     }
 }
-API_KEY_URL = "81a3edae-ece8-47ed-a672-13e7961a6fcc"
-API_KEY_PROXY = "d0f35644-3095-48f9-b109-9146894ae581"
 
+# API_ENDPOINT_PARSE = f'http://localhost:8080/v2/{TEST_CONFIG[CURRENT_TEST]["endpoint"]}'
+API_ENDPOINT_PARSE = f'http://localhost:8080/{TEST_CONFIG[CURRENT_TEST]["endpoint"]}'
+### Settings for coverage calculation
+# name(*required) is the field name
+# critical(default = False) means that this field attends to calculate critical coverage score
+# weight(default = 1) means the importance of this field
+# children(default = 1) means that this field contains subfield.
+
+# Walmart Search Fields
 WALMART_SEARCH_FIELDS = [
     {"name": "data", "critical": True, "weight" : 5, "children" : [
         {"name": "results", "critical": True, "weight" : 10, "children" : [
@@ -83,6 +113,157 @@ WALMART_SEARCH_FIELDS = [
     ]}
 ]
 
+# Walmart Product Fields
+WALMART_PRODUCT_FIELDS = [
+    {"name": "data", "critical": True, "children" : [
+        {"name": "product", "critical": True, "weight" : 10, "children" : [
+            {"name": "categories", "weight" : 3, "critical": True },
+            {"name": "name", "weight" : 3, "critical": True },
+            {"name": "brand", "critical": True},
+            {"name": "brand_url" },
+            {"name": "images", "weight" : 2, "critical": True },
+            {"name": "thumbnail" },
+            {"name": "average_rating", "critical": True },
+            {"name": "number_of_reviews", "critical": True },
+            {"name": "model"},
+            {"name": "available_status", "critical": True},
+            {"name": "sales_unit"},
+            {"name": "price_info", "weight" : 2, "critical": True, "children" : [
+                { "name": "price", "critical": True, "weight" : 3 },
+                { "name": "price_string", "critical": True, "weight" : 3 },
+                { "name": "was_price" },
+                { "name": "unit_price" },
+                { "name": "was_price" },
+                { "name": "ship_price" },
+                { "name": "list_price" },
+                { "name": "comparison_price" },
+                { "name": "savings_amount" },
+                { "name": "price_range" },
+                { "name": "additional_fees" },
+            ]},
+            {"name": "fulfillments"},
+            {"name": "badges", "children" : [
+                { "name": "flags" },
+                { "name": "labels" },
+                { "name": "groups" },
+                { "name": "tags" },
+            ]},
+            {"name": "seller", "critical": True, "weight" : 2, "children" : [
+                { "name": "name", "weight" : 3, "critical": True },
+                { "name": "display_name" },
+                { "name": "store_url" },
+                { "name": "review_count" },
+                { "name": "average_rating" },
+            ]},
+            { "name": "return_policy" },
+            { "name": "location", "children" : [
+                { "name": "postal_code" },
+                { "name": "state_code" },
+                { "name": "city" },
+            ]},
+            {"name": "item_id" },
+            {"name": "offer_type" },
+            {"name": "transactable_offer_count" },
+            {"name": "interactive_product_video" },
+        ]},
+        {"name": "about", "critical": True, "weight" : 5,  "children": [
+            {"name": "nutrition_information" },
+            {"name": "product_details", "critical": True, "weight" : 3, "children": [
+                { "name": "short_description", "critical": True },
+                { "name": "long_description", "critical": True },    
+            ] },
+            { "name": "specifications", "weight" : 2, "critical": True },
+            { "name": "warnings" },
+            { "name": "directions" },
+            { "name": "highlights" },
+            { "name": "ingredients" },
+            { "name": "warranty" },
+            { "name": "videos" },
+        ]},
+        {"name": "related_search"},
+        {"name": "review_infomation", "critical": True, "children": [
+            {"name": "average_rating", "weight" : 3, "critical": True },
+            {"name": "total_review_count", "weight" : 3, "critical": True },
+            { "name": "total_media_count" },
+            { "name": "5_star_rating" },
+            { "name": "5_star_percent" },
+            { "name": "4_star_rating" },
+            { "name": "4_star_percent" },
+            { "name": "3_star_rating" },
+            { "name": "3_star_percent" },
+            { "name": "2_star_rating" },
+            { "name": "2_star_percent" },
+            { "name": "1_star_rating" },
+            { "name": "1_star_percent" },
+            { "name": "top_negative_review", "weight" : 3, "critical": True },
+            { "name": "top_positive_review", "weight" : 3, "critical": True },
+            { "name": "customer_reviews", "weight" : 3, "critical": True },
+        ]},
+        {"name": "related_pages", "weight" : 2, "critical": True}
+    ]}
+]
+
+# Google Search Fields
+GOOGLE_SEARCH_FIELDS = [
+    { "name": "search_information", "critical": True, "weight" : 2, "children" : [
+        { "name": "total_results", "critical": True },
+        { "name": "time_taken_displayed", "critical": True },
+        { "name": "query_displayed", "critical": True },
+    ]},
+    { "name": "ads", "children" : [
+        { "name": "position"},
+        { "name": "block_position"},
+        { "name": "title", "weight" : 3},
+        { "name": "link", "weight" : 3},
+        { "name": "thumbnail"},
+        { "name": "displayed_link"},
+        { "name": "sitelinks", "children" : [
+            { "name": "inline", "children" : [
+                { "name": "link" },
+                { "name": "title" },
+            ] },
+            { "name": "block", "children" : [
+                { "name": "description" },
+                { "name": "link" },
+                { "name": "title" },
+            ]},
+        ]},
+    ]},
+    { "name": "knowledge_graph", "weight" : 2, "children" : [
+        { "name": "title", "weight" : 3 },
+        { "name": "image", "weight" : 2 },
+        { "name": "description", "weight" : 3 },
+        { "name": "source" },
+        { "name": "related" },
+        { "name": "related_link" },
+        { "name": "social_media" },
+        { "name": "see_more_about" },
+    ]},
+    { "name": "related_questions", "critical": True, "weight" : 2 },
+    { "name": "organic_results", "critical": True, "weight" : 10, "children" : [
+        { "name": "position" },
+        { "name": "title", "critical": True, "weight" : 2 },
+        { "name": "snippet", "critical": True, "weight" : 2 },
+        { "name": "link", "critical": True, "weight" : 2 },
+        { "name": "date" },
+        { "name": "displayed_link" },
+        { "name": "thumbnail" },
+        { "name": "site_links" , "children" : [
+            { "name": "inline", "children" : [
+                { "name": "link" },
+                { "name": "title" },
+            ] },
+            { "name": "block", "children" : [
+                { "name": "description" },
+                { "name": "link" },
+                { "name": "title" },
+            ]},
+        ]},
+    ]},
+    { "name": "related_searches", "critical": True },
+    { "name": "more", "critical": True },
+]
+
 def is_empty(value):
     if value is None:
         return True
@@ -136,20 +317,24 @@ def calculate_fields(fields, record):
         critical_total_max += childField.get("weight", 1) if childField.get("critical", False) else 0.0
         critical_total_sum += critical * childField.get("weight", 1) if childField.get("critical", False) else 0.0
         if childField.get("critical", False):
-            print(f"*** {overall:.2f}: {critical:.2f} : {childField.get("name", "unknown")} * {childField.get("weight", 1)} : {overall_total_max:.2f} : {overall_total_sum:.2f}: {critical_total_max:.2f} : {critical_total_sum:.2f}")
+            print(f"*** {overall:.3f}: {critical:.3f} : {childField.get("name", "unknown")} * {childField.get("weight", 1)} : {overall_total_max:.3f} : {overall_total_sum:.3f}: {critical_total_max:.3f} : {critical_total_sum:.3f}")
         else:
-            print(f"--- {overall:.2f}: {critical:.2f} : {childField.get("name", "unknown")} * {childField.get("weight", 1)} : {overall_total_max:.2f} : {overall_total_sum:.2f}: {critical_total_max:.2f} : {critical_total_sum:.2f}")
+            print(f"--- {overall:.3f}: {critical:.3f} : {childField.get("name", "unknown")} * {childField.get("weight", 1)} : {overall_total_max:.3f} : {overall_total_sum:.3f}: {critical_total_max:.3f} : {critical_total_sum:.3f}")
     overall_score = overall_total_sum / overall_total_max
     critical_score = critical_total_sum / critical_total_max if critical_total_max > 0 else 1.0
-    print(f"### : {overall_score:.2f}: {critical_score:.2f}")
+    print(f"### : {overall_score:.3f}: {critical_score:.3f}")
     return overall_score, critical_score
 
 def calculate_score(result):
     if CURRENT_TEST == "walmart-search" :
         return calculate_fields(WALMART_SEARCH_FIELDS, result)
-    else:
+    elif CURRENT_TEST == "walmart-product" :
+        return calculate_fields(WALMART_PRODUCT_FIELDS, result)
+    elif CURRENT_TEST == "google-search" :
+        return calculate_fields(GOOGLE_SEARCH_FIELDS, result)
+    else :
         return 0.0, 0.0
-
+    
 def save_result(result):
     with open("../data/result.json", "w", encoding="utf-8") as f:
         json.dump(result, fp=f, indent="\t")
@@ -179,7 +364,7 @@ def gather_html(url):
 
 def parse_html(html):
     try:
-        resp = requests.post(f"http://localhost:8080/v2/{TEST_CONFIG[CURRENT_TEST]["endpoint"]}", json={
+        resp = requests.post(API_ENDPOINT_PARSE, json={
             "url": "url",
             "html": html
         })        
@@ -222,7 +407,7 @@ for url in sample_urls:
         overall_score, critical_score = calculate_score(result)
         overall_scores = np.append(overall_scores, overall_score)
         critical_scores = np.append(critical_scores, critical_score)
-        print(f"{count} : {overall_score:.2f} : {critical_score:.2f} : {url["url"]}")
+        print(f"{count} : {overall_score:.3f} : {critical_score:.3f} : {url["url"]}")
     
 # with open("./data/walmart-search.json", "r", encoding="utf-8") as f:
 #     result = json.load(f)
