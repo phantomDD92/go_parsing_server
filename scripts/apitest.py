@@ -5,14 +5,15 @@ import datetime
 
 TEST_URLS = [
     { "url" : 
-        "https://www.walmart.com/ip/-/138716571",
+        "https://www.walmart.com/reviews/product/172844767",
         # "https://www.walmart.com/search?catId=976759&facet=brand%3AMarketside&q=cake&sort=best_seller",
         # "https://www.walmart.com/search?q=metal%20garden%20hose&sort=best_match&affinityOverride=default&page=3",
         # "https://www.walmart.com/search?q=travel%20bags%20for%20luggage&sort=best_match&affinityOverride=default&page=2",
     }
 ]
 
-CURRENT_TEST = "walmart-product"
+CURRENT_TEST = "walmart-review"
+# CURRENT_TEST = "walmart-product"
 # CURRENT_TEST = "walmart-search"
 # CURRENT_TEST = "google-search"
 SAMPLE_COUNT = 1
@@ -34,6 +35,11 @@ TEST_CONFIG = {
     },
     "walmart-product": {
         "url": "*walmart.com/ip/*",
+        "domain": "walmart.com",
+        "endpoint": "walmart",
+    },
+    "walmart-review": {
+        "url": "*walmart.com/reviews/*",
         "domain": "walmart.com",
         "endpoint": "walmart",
     },
@@ -203,6 +209,59 @@ WALMART_PRODUCT_FIELDS = [
     ]}
 ]
 
+# Walmart Review Fields
+WALMART_REVIEW_FIELDS = [
+    {"name": "data", "critical": True, "children" : [
+        {"name": "reviews", "critical": True, "weight" : 10, "children" : [
+            {"name": "title", "weight" : 3, "critical": True },
+            {"name": "text", "weight" : 3, "critical": True },
+            {"name": "time", "critical": True},
+            {"name": "rating" },
+            {"name": "username", "critical": True },
+            {"name": "badges" },
+            {"name": "media" },
+        ]},
+        {"name": "top_negative_review", "weight" : 2, "critical": True, "children" : [
+            {"name": "title", "weight" : 3, "critical": True },
+            {"name": "text", "weight" : 3, "critical": True },
+            {"name": "time", "critical": True},
+            {"name": "rating" },
+            {"name": "username", "critical": True },
+            {"name": "badges" },
+            {"name": "media" },
+        ]},
+        {"name": "top_positive_review", "weight" : 2, "critical": True, "children" : [
+            {"name": "title", "weight" : 3, "critical": True },
+            {"name": "text", "weight" : 3, "critical": True },
+            {"name": "time", "critical": True},
+            {"name": "rating" },
+            {"name": "username", "critical": True },
+            {"name": "badges" },
+            {"name": "media" },
+        ]},
+        {"name": "product", "weight" : 2, "critical": True, "children" : [
+            {"name": "name", "weight" : 2, "critical": True },
+            {"name": "url", "weight" : 2, "critical": True },
+            {"name": "type"},
+            {"name": "seller" },
+            {"name": "categories", "weight" : 2, "critical": True },
+        ]},
+        {"name": "frequent_mentions"},
+        {"name": "pagination", "critical": True, "children" : [
+            {"name": "page_count", "critical": True },
+            {"name": "current_page", "critical": True },
+            {"name": "current_span", "critical": True},
+            {"name": "page_links", "weight" : 2, "critical": True },
+        ]},
+        {"name": "average_rating", "critical": True},
+        {"name": "total_review_count", "critical": True},
+        {"name": "review_withtext_count"},
+        {"name": "aspect_review_count"},
+        {"name": "total_media_count"},
+        {"name": "aspect_review_count"},
+    ]}
+]
+
 # Google Search Fields
 GOOGLE_SEARCH_FIELDS = [
     { "name": "search_information", "critical": True, "weight" : 2, "children" : [
@@ -330,6 +389,8 @@ def calculate_score(result):
         return calculate_fields(WALMART_SEARCH_FIELDS, result)
     elif CURRENT_TEST == "walmart-product" :
         return calculate_fields(WALMART_PRODUCT_FIELDS, result)
+    elif CURRENT_TEST == "walmart-review" :
+        return calculate_fields(WALMART_REVIEW_FIELDS, result)
     elif CURRENT_TEST == "google-search" :
         return calculate_fields(GOOGLE_SEARCH_FIELDS, result)
     else :
