@@ -145,7 +145,7 @@ type WalmartRawConfigs struct {
 	} `json:"pillsV2,omitempty"`
 }
 
-type WalmartSearchRawResult struct {
+type WsrResult struct {
 	Props struct {
 		PageProps struct {
 			InitialData struct {
@@ -268,7 +268,7 @@ type WalmartSearchTile struct {
 	} `json:"site_link"`
 }
 
-type WalmartSearchData struct {
+type WsData struct {
 	TotalCount        int                    `json:"total_count"`
 	TotalCountDisplay string                 `json:"total_count_display"`
 	Query             map[string]string      `json:"search_query"`
@@ -284,10 +284,10 @@ type WalmartSearchData struct {
 	} `json:"pagination"`
 }
 
-type WalmartSearchResult struct {
-	Data   WalmartSearchData `json:"data"`
-	Status string            `json:"status"`
-	URL    string            `json:"url"`
+type WsResult struct {
+	Data   WsData `json:"data"`
+	Status string `json:"status"`
+	URL    string `json:"url"`
 }
 
 func normalizeWalmartImage(url string) string {
@@ -375,10 +375,10 @@ func parseWalmartBanner(config WalmartRawConfigs) WalmartSearchBanner {
 	return banner
 }
 
-func Walmart_SearchPageScraper(jsonTag *goquery.Selection) WalmartSearchResult {
-	var raw WalmartSearchRawResult
-	var result WalmartSearchResult
-	var data WalmartSearchData
+func Walmart_SearchPageScraper(jsonTag *goquery.Selection) WsResult {
+	var raw WsrResult
+	var result WsResult
+	var data WsData
 	baseUrl := "https://www.walmart.com"
 	// dataTag := doc.Find("script#__NEXT_DATA__").First()
 	// if dataTag.Length() > 0 {

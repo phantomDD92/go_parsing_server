@@ -14,7 +14,7 @@ type RequestData struct {
 }
 
 func main() {
-	// Walmart_ParseHtml("walmart-product")
+	// Walmart_ParseHtml("walmart-review")
 	r := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"}                      // Allow all origins

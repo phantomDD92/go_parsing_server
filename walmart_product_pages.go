@@ -186,7 +186,10 @@ type WprReview struct {
 	PositiveFeedback     int    `json:"positiveFeedback"`
 	UserNickname         int    `json:"userNickname"`
 	Badges               []struct {
-		Id string `json:"id"`
+		Id         string `json:"id"`
+		GlassBadge struct {
+			Text string `json:"text"`
+		} `json:"glassBadge"`
 	} `json:"badges"`
 	Media []struct {
 		MediaType string `json:"mediaType"`
