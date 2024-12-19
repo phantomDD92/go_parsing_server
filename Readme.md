@@ -1,4 +1,4 @@
-# Amazon Html Parsing Server
+# Simple Html Parsing Server
 
 ## Run server
 
